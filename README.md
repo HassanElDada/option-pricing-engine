@@ -177,7 +177,7 @@ Time to Maturity: 1 years
 | Week | Feature |
 |---|---|
 | ✅ Week 1 | Black-Scholes pricing, Greeks, tests, plots |
-| 🔜 Week 2 | Monte Carlo option pricing with variance reduction |
+| ✅ Week 2 | Monte Carlo option pricing with variance reduction |
 | 🔜 Week 3 | Implied volatility solver using Brent's method |
 | 🔜 Week 4 | Interactive Streamlit dashboard |
 | 🔜 Later | Volatility smile and surface, exotic options |
