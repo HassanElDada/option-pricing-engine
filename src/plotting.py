@@ -247,3 +247,90 @@ def plot_vega_vs_stock(K:float, T:float, r:float, sigma:float) -> None:
 
     plt.tight_layout()
     plt.show()
+
+def plot_monte_carlo_convergence(S: float, K: float, T: float, r:float, sigma:float, option_type: str = "call") -> None:
+    """
+    Plot Monte Carlo price convergence as the number of simulations increases.
+
+    This chart shows one of the most important properties of Monte Carlo:
+    the price estimate gets closer and closer to the true Black-Scholes price
+    as we run more simulations. The error shrinks proportionally to 1/sqrt(n_simulations)
+    - a fundamental result in statistics.
+
+    Key things to observe:
+    -With few simulations (left side), the estimate is noisy and unreliable
+    -With many simulations (right side), it converges to the true price
+    -The confidence band (shaded area) shrinks as simulations increase
+    -Antithetic variates converge faster than basic Monte Carlo
+
+    Parameters:
+    S: current stock price
+    K: strike price
+    T: time to maturity in years
+    r: risk free rate
+    sigma: volatility
+    option_type = "call" or "put"
+    """
+
+    # we import here to avoid circular imports at the top of the file  
+    from src.monte_carlo import monte_carlo_price
+    from src.black_scholes import black_scholes
+
+    #the true price from Black-Scholes - this is what Monte Carlo converges to
+    bs_price = black_scholes(S,K,T,r,sigma,option_type)
+
+    #a range of simulation counts to test
+    #np.logspace gives us evenly spaced points on a log scale
+    #this means we test 100,200,500,1000,2000, ..., up to 100000
+    #log scale is better here because the improvement is dramatic at low counts
+    # and subtle at high counts
+    sim_counts = np.logspace(2,5,50).astype(int)
+
+    mc_prices = [] #basic Monte Carlo prices
+    antithetic_prices = [] #antithetic variate prices
+    std_errors        = []  # standard errors for confidence band
+
+    #run Monte Carlo for each simulation count
+    for n in sim_counts:
+        result = monte_carlo_price(S,K,T,r,sigma,option_type,n_simulations = n, seed = 42)
+        mc_prices.append(result["price"])
+        antithetic_prices.append(result["price_antithetic"])
+        std_errors.append(result["std_error"])
+
+    #convert to numpy arrays for easier match
+    mc_prices = np.array(mc_prices)
+    antithetic_prices = np.array(antithetic_prices)
+    std_errors = np.array(std_errors)
+
+    #discount std_errors to get confidence band
+    #the true price should fall within +/- 2 standard errors 95% of the time
+    upper_band = mc_prices + 2*std_errors
+    lower_band = mc_prices - 2*std_errors
+
+    #build the plot
+    fig,ax = plt.subplots(figsize = (10,6))
+
+    #basic Monte Carlo line
+    ax.plot(sim_counts, mc_prices, label = "Monte Carlo", color = "steelblue", linewidth = 2)
+
+    #antithetic variates line
+    ax.plot(sim_counts, antithetic_prices, label = "Antithetic Variates", color = "mediumpurple", linewidth = 2)
+
+    #true Black-Scholes price as a horizontal reference line
+    ax.axhline(y = bs_price, color = "tomato", linestyle = "--", linewidth = 1.5,label=f"Black-Scholes = {bs_price:.4f}")
+
+    #shaded confidence band - shows uncertainty around the basic MC estimate
+    # alpha = 0.2 makes it transparent so it doesn't dominate the chart
+    ax.fill_between(sim_counts, lower_band, upper_band, alpha = 0.2, color = "steelblue", label = "95% Confidence Band")
+
+    #log scale on x axis - makes the convergence behaviour easier to see 
+    ax.set_xscale("log")
+
+    ax.set_title(f"Monte Carlo Convergence — {option_type.capitalize()} Option", fontsize=14)
+    ax.set_xlabel("Number of Simulations (log scale)")
+    ax.set_ylabel("Option Price")
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    plt.show()
