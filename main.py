@@ -1,4 +1,6 @@
 from src.black_scholes import black_scholes
+from src.monte_carlo import monte_carlo_price
+from src.plotting import plot_monte_carlo_convergence
 from src.greeks import delta, gamma, vega, theta, rho
 from src.plotting import (
     plot_price_vs_stock,
@@ -81,6 +83,31 @@ def print_greeks():
     print("  Theta — per calendar day")
     print("  Rho   — per 1% change in interest rate")
 
+def print_monte_carlo_comparison():
+    """
+    Run Monte Carlo pricing and compare it against Black-Scholes
+    """
+    print("\n" + "=" * 45)
+    print("       MONTE CARLO vs BLACK-SCHOLES")
+    print("=" * 45)
+
+    #exact Black-Scholes prices for comparison
+    bs_call = black_scholes(S,K,T,r,sigma,"call")
+    bs_put = black_scholes(S,K,T,r,sigma,"put")
+
+    #monte carlo prices with 100,000 simulations
+    mc_call = monte_carlo_price(S,K,T,r,sigma,"call", n_simulations = 100000, seed = 42)
+    mc_put = monte_carlo_price(S,K,T,r,sigma,"put", n_simulations = 100000, seed = 42)
+    print(f"  {'':<20} {'Call':>10} {'Put':>10}")
+    print("-" * 45)
+    print(f"  {'Black-Scholes':<20} {bs_call:>10.4f} {bs_put:>10.4f}")
+    print(f"  {'Monte Carlo':<20} {mc_call['price']:>10.4f} {mc_put['price']:>10.4f}")
+    print(f"  {'Antithetic':<20} {mc_call['price_antithetic']:>10.4f} {mc_put['price_antithetic']:>10.4f}")
+    print(f"  {'Std Error':<20} {mc_call['std_error']:>10.4f} {mc_put['std_error']:>10.4f}")
+    print("=" * 45)
+    print(f"\n  Simulations: 100,000")
+    print(f"  As simulations increase, Monte Carlo converges to Black-Scholes.")
+
 def run_plots():
     """Generate all sensitivity plots"""
     print("\n  Generating plots — close each window to see the next one.")
@@ -98,8 +125,12 @@ def run_plots():
 
     print("  Plot 5: Vega vs Stock Price")
     plot_vega_vs_stock(K=K, T=T, r=r, sigma=sigma)
+    print("  Plot 6: Monte Carlo Convergence")
+    plot_monte_carlo_convergence(S=S, K=K, T=T, r=r, sigma=sigma, option_type="call")
+
 
 if __name__ == "__main__":
     print_prices()
     print_greeks()
+    print_monte_carlo_comparison()
     run_plots()
