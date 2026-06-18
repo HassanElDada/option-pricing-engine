@@ -378,8 +378,8 @@ def plot_volatility_smile(S:float, T:float, r:float, sigma_atm:float) -> None:
     # skew: negative value tilts the smile so low strikes have higher vol
     #       (this reflects real market demand for crash protection via puts)
     # smile: positive value creates the upward curve on both sides
-    skew  = -0.1   # left side steeper than right — realistic market behavior
-    smile =  0.15  # controls how curved the smile is
+    skew = -0.05   # left side steeper than right — realistic market behavior
+    smile = 0.3  # controls how curved the smile is
 
     implied_vols = []
 
@@ -394,7 +394,7 @@ def plot_volatility_smile(S:float, T:float, r:float, sigma_atm:float) -> None:
         true_sigma = max(true_sigma,0.01)
 
         #price the option using the smile-adjusted volatility
-        price = black_scholes(S,K,T,r,sigma,"call")
+        price = black_scholes(S,K,T,r,true_sigma,"call")
 
         # now recover the implied volatility from that price
         # in a flat world this would equal true_sigma exactly

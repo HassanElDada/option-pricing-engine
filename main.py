@@ -9,6 +9,8 @@ from src.plotting import (
     plot_gamma_vs_stock,
     plot_vega_vs_stock,
 )
+from src.implied_volatility import implied_volatility
+from src.plotting import plot_volatility_smile
 
 #Defining our example parameters
 # These represent a realistic at the money option scenario
@@ -108,6 +110,30 @@ def print_monte_carlo_comparison():
     print(f"\n  Simulations: 100,000")
     print(f"  As simulations increase, Monte Carlo converges to Black-Scholes.")
 
+def print_implied_volatility():
+    """
+    Demonstrate the implied volatility solver across different strikes.
+    """
+    print("\n" + "=" * 45)
+    print("         IMPLIED VOLATILITY SOLVER")
+    print("=" * 45)
+    print(f"  {'Strike':<10} {'Market Price':>12} {'Implied Vol':>12}")
+    print("-" * 45)
+
+    #compute implied volatility for a range of strikes
+    #we use sigma = 0.2 to generate the market price
+    strikes = [80,90,100,110,120]
+    for K_val  in strikes:
+        price = black_scholes(S,K_val, T,r,sigma, "call")
+        iv = implied_volatility(price,S,K_val, T,r,"call")
+        print(f"  {K_val:<10} {price:>12.4f} {iv*100:>11.2f}%")
+
+    print("=" * 45)
+    print("\n  All implied vols recover the original sigma (0.20)")
+    print("  since we used Black-Scholes prices as input.")
+    print("  In real markets, implied vols vary across strikes")
+    print("  — this is the volatility smile.")
+
 def run_plots():
     """Generate all sensitivity plots"""
     print("\n  Generating plots — close each window to see the next one.")
@@ -128,9 +154,14 @@ def run_plots():
     print("  Plot 6: Monte Carlo Convergence")
     plot_monte_carlo_convergence(S=S, K=K, T=T, r=r, sigma=sigma, option_type="call")
 
+    print("  Plot 7: Volatility Smile")
+    plot_volatility_smile(S=S, T=T, r=r, sigma_atm=sigma)
+
+
 
 if __name__ == "__main__":
     print_prices()
     print_greeks()
     print_monte_carlo_comparison()
+    print_implied_volatility()
     run_plots()
