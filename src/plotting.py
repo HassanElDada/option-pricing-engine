@@ -334,3 +334,96 @@ def plot_monte_carlo_convergence(S: float, K: float, T: float, r:float, sigma:fl
 
     plt.tight_layout()
     plt.show()
+
+def plot_volatility_smile(S:float, T:float, r:float, sigma_atm:float) -> None:
+    """
+    Plot the implied volatility smile across different strike prices.
+
+    In a perfect Black-Scholes world, implied volatility would be flat across all strikes
+    - the model assumes constant volatility. But in real markets, out-of-the-money options trade
+    at higher implied volatilies than at-the-money options, creating a smile shape.
+
+    We simulate this by adding a realistic smile curve on top of the
+    flat Black-Scholes volatility, then recovering the implied vol
+    from the resulting prices. This shows what the smile looks like
+    and how implied volatility varies across strikes.
+
+    Key things to observe:
+    - The smile is lowest at the money (strike = stock price)
+    - It rises on both sides — higher for low strikes (puts) and
+      high strikes (calls)
+    - The left side (low strikes) is often steeper than the right —
+      this is called volatility skew, driven by demand for crash protection
+
+    Parameters
+    ----------
+    S        : current stock price
+    T        : time to maturity in years
+    r        : risk-free rate
+    sigma_atm: the at-the-money volatility (the base volatility level)
+    """
+    from src.implied_volatility import implied_volatility
+
+    #range of strike prices from 70% to 130% of the stock price
+    #this covers realistic in-the-money and out-of-the-money strikes
+    K_range = np.linspace(S*0.7,S*1.3,50)
+
+    # simulate a realistic volatility smile
+    # in real markets the smile is driven by supply and demand for options
+    # at different strikes. We model it with a simple quadratic curve:
+    #   sigma(K) = sigma_atm + skew * moneyness + smile * moneyness^2
+    # where moneyness = (K - S) / S measures how far the strike is from
+    # the current stock price, normalized by the stock price
+    #
+    # skew: negative value tilts the smile so low strikes have higher vol
+    #       (this reflects real market demand for crash protection via puts)
+    # smile: positive value creates the upward curve on both sides
+    skew  = -0.1   # left side steeper than right — realistic market behavior
+    smile =  0.15  # controls how curved the smile is
+
+    implied_vols = []
+
+    for K in K_range:
+        #moneyness: 0 means at-the-money, negative means below, positive above
+        moneyness = (K-S)/S
+
+        #true volatility for this strike - the smile-adjusted sigma
+        true_sigma = sigma_atm + skew * moneyness + smile * moneyness**2
+
+        #make sure sigma stays positive - very deep strikes could go negative
+        true_sigma = max(true_sigma,0.01)
+
+        #price the option using the smile-adjusted volatility
+        price = black_scholes(S,K,T,r,sigma,"call")
+
+        # now recover the implied volatility from that price
+        # in a flat world this would equal true_sigma exactly
+        # here it traces out the smile shape
+        try:
+            iv = implied_volatility(price, S, K, T, r, "call")
+            implied_vols.append(iv * 100)  # convert to percentage for readability
+        except ValueError:
+            # skip strikes where the price falls outside arbitrage bounds
+            implied_vols.append(np.nan)
+
+
+    #build the plot:
+    fig,ax = plt.subplots(figsize=(10,6))
+
+    ax.plot(K_range, implied_vols,color = "steelblue", linewidth = 2, label = "Implied Volatility")
+
+    #Vertical line at the current stock price (at-the-money point)
+    ax.axvline(x=S, color = "tomato", linestyle = "--", linewidth = 1.5, label = f"ATM Strike = {S}")
+
+    # horizontal line at the base volatility level
+    ax.axhline(y=sigma_atm * 100, color="gray", linestyle="--", linewidth=1,
+               label=f"ATM Vol = {sigma_atm*100:.0f}%")
+
+    ax.set_title("Volatility Smile", fontsize=14)
+    ax.set_xlabel("Strike Price (K)")
+    ax.set_ylabel("Implied Volatility (%)")
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    plt.show()
