@@ -1,12 +1,12 @@
 # Options Pricing and Volatility Analytics Engine
 
-A Black-Scholes options pricing engine built in Python, featuring European call and put pricing, all five Greeks, sensitivity analysis plots, and a full test suite.
+A Black-Scholes options pricing engine built in Python, featuring European call and put pricing, all five Greeks, Monte Carlo simulation, implied volatility solving, and a full test suite.
 
 ---
 
 ## Why This Project Matters
 
-Options pricing is at the core of quantitative finance. Every major bank, hedge fund, and trading firm prices derivatives daily using models rooted in Black-Scholes. Understanding and implementing these models from scratch — including the Greeks and their sensitivities — demonstrates the mathematical and software engineering foundations expected in quant roles.
+Options pricing is at the core of quantitative finance. Every major bank, hedge fund, and trading firm prices derivatives daily using models rooted in Black-Scholes. Understanding and implementing these models from scratch — including the Greeks, Monte Carlo simulation, and implied volatility — demonstrates the mathematical and software engineering foundations expected in quant roles.
 
 ---
 
@@ -14,9 +14,12 @@ Options pricing is at the core of quantitative finance. Every major bank, hedge 
 
 - European call and put pricing using the Black-Scholes formula
 - All five Greeks: Delta, Gamma, Vega, Theta, Rho
+- Monte Carlo simulation using Geometric Brownian Motion with antithetic variance reduction
+- Implied volatility solver using Brent's method
+- Volatility smile visualization
 - Input validation with clear error messages
-- 21 passing unit tests using pytest
-- Sensitivity plots using Matplotlib
+- 46 passing unit tests using pytest
+- 7 sensitivity and analysis plots using Matplotlib
 - Clean, well-commented, professional Python code
 
 ---
@@ -31,13 +34,13 @@ The Black-Scholes model prices European options using five inputs:
 | Strike Price | K | Price at which the option can be exercised |
 | Time to Maturity | T | Time until expiry, in years |
 | Risk-Free Rate | r | Annualized continuously compounded risk-free rate |
-| Volatility | σ | Annualized standard deviation of stock returns |
+| Volatility | sigma | Annualized standard deviation of stock returns |
 
 **Intermediate values:**
 
 ```
-d1 = [ln(S/K) + (r + σ²/2) * T] / [σ * √T]
-d2 = d1 - σ * √T
+d1 = [ln(S/K) + (r + sigma^2/2) * T] / [sigma * sqrt(T)]
+d2 = d1 - sigma * sqrt(T)
 ```
 
 **Option prices:**
@@ -69,23 +72,26 @@ Greeks measure how sensitive the option price is to changes in market conditions
 
 ```
 option-pricing-engine/
-│
-├── src/
-│   ├── __init__.py
-│   ├── black_scholes.py   
-│   ├── greeks.py          
-│   └── plotting.py        
-│
-├── tests/
-│   ├── test_black_scholes.py
-│   └── test_greeks.py
-│
-├── notebooks/
-│
-├── conftest.py
-├── main.py
-├── requirements.txt
-└── README.md
+|
+|-- src/
+|   |-- __init__.py
+|   |-- black_scholes.py        # Black-Scholes pricing formula
+|   |-- greeks.py               # Delta, Gamma, Vega, Theta, Rho
+|   |-- monte_carlo.py          # Monte Carlo pricer with antithetic variates
+|   |-- implied_volatility.py   # Implied volatility solver using Brent's method
+|   |-- plotting.py             # All sensitivity and analysis plots
+|
+|-- tests/
+|   |-- test_black_scholes.py
+|   |-- test_greeks.py
+|   |-- test_monte_carlo.py
+|   |-- test_implied_volatility.py
+|
+|-- notebooks/
+|-- conftest.py
+|-- main.py
+|-- requirements.txt
+|-- README.md
 ```
 
 ---
@@ -122,7 +128,7 @@ pip install -r requirements.txt
 python main.py
 ```
 
-This will print option prices and all Greeks to the terminal, then generate five sensitivity plots.
+This will print option prices, Greeks, Monte Carlo comparison, and implied volatility table to the terminal, then generate 7 plots.
 
 ---
 
@@ -131,6 +137,8 @@ This will print option prices and all Greeks to the terminal, then generate five
 ```bash
 pytest tests/ -v
 ```
+
+46 tests should pass.
 
 ---
 
@@ -162,25 +170,42 @@ Time to Maturity: 1 years
   Rho            0.5323    -0.4189
 =============================================
 
-  Units:
-  Delta — per $1 move in stock price
-  Gamma — per $1 move in stock price
-  Vega  — per 1% change in volatility
-  Theta — per calendar day
-  Rho   — per 1% change in interest rate
+=============================================
+       MONTE CARLO vs BLACK-SCHOLES
+=============================================
+                       Call        Put
+---------------------------------------------
+  Black-Scholes      10.4506     5.5735
+  Monte Carlo        10.4739     5.6045
+  Antithetic         10.4611     5.5812
+  Std Error           0.0490     0.0454
+=============================================
+  Simulations: 100,000
+
+=============================================
+         IMPLIED VOLATILITY SOLVER
+=============================================
+  Strike    Market Price    Implied Vol
+---------------------------------------------
+  80            0.0265        20.00%
+  90            1.8692        20.00%
+  100          10.4506        20.00%
+  110          25.6898        20.00%
+  120          44.5234        20.00%
+=============================================
 ```
 
 ---
 
 ## Roadmap
 
-| Week | Feature |
+| Status | Feature |
 |---|---|
-| ✅ Week 1 | Black-Scholes pricing, Greeks, tests, plots |
-| ✅ Week 2 | Monte Carlo option pricing with variance reduction |
-| 🔜 Week 3 | Implied volatility solver using Brent's method |
-| 🔜 Week 4 | Interactive Streamlit dashboard |
-| 🔜 Later | Volatility smile and surface, exotic options |
+| Completed | Black-Scholes pricing, Greeks, tests, plots |
+| Completed | Monte Carlo pricing with antithetic variance reduction |
+| Completed | Implied volatility solver and volatility smile |
+| Coming Soon | Interactive Streamlit dashboard |
+| Coming Soon | Volatility surface, exotic options |
 
 ---
 
@@ -189,8 +214,8 @@ Time to Maturity: 1 years
 | Library | Version | Purpose |
 |---|---|---|
 | NumPy | >=1.24.0 | Mathematical operations |
-| SciPy | >=1.10.0 | Normal distribution functions |
-| Matplotlib | >=3.7.0 | Sensitivity plots |
+| SciPy | >=1.10.0 | Normal distribution and Brent's method |
+| Matplotlib | >=3.7.0 | Sensitivity and analysis plots |
 | pytest | >=7.4.0 | Unit testing |
 
 ---
