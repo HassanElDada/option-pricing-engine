@@ -1,6 +1,15 @@
 # Options Pricing and Volatility Analytics Engine
 
-A Black-Scholes options pricing engine built in Python, featuring European call and put pricing, all five Greeks, Monte Carlo simulation, implied volatility solving, and a full test suite.
+A Black-Scholes options pricing engine built in Python, featuring European call and put pricing, all five Greeks, Monte Carlo simulation, implied volatility solving, and an interactive web dashboard.
+
+---
+
+## Live Demo
+
+Try the interactive dashboard here:
+**[https://hassaneldada-option-pricing-engine-dashboard-nmkgkn.streamlit.app/](https://hassaneldada-option-pricing-engine-dashboard-nmkgkn.streamlit.app/)**
+
+Adjust sliders to price options in real time, run Monte Carlo simulations, and solve for implied volatility — no installation required.
 
 ---
 
@@ -17,6 +26,7 @@ Options pricing is at the core of quantitative finance. Every major bank, hedge 
 - Monte Carlo simulation using Geometric Brownian Motion with antithetic variance reduction
 - Implied volatility solver using Brent's method
 - Volatility smile visualization
+- Interactive Streamlit dashboard with live sliders
 - Input validation with clear error messages
 - 46 passing unit tests using pytest
 - 7 sensitivity and analysis plots using Matplotlib
@@ -90,6 +100,7 @@ option-pricing-engine/
 |-- notebooks/
 |-- conftest.py
 |-- main.py
+|-- dashboard.py
 |-- requirements.txt
 |-- README.md
 ```
@@ -122,7 +133,17 @@ pip install -r requirements.txt
 
 ---
 
-## Running the Demo
+## Running the Dashboard
+
+```bash
+python -m streamlit run dashboard.py
+```
+
+This opens the interactive dashboard in your browser.
+
+---
+
+## Running the Demo Script
 
 ```bash
 python main.py
@@ -204,7 +225,7 @@ Time to Maturity: 1 years
 | Completed | Black-Scholes pricing, Greeks, tests, plots |
 | Completed | Monte Carlo pricing with antithetic variance reduction |
 | Completed | Implied volatility solver and volatility smile |
-| Coming Soon | Interactive Streamlit dashboard |
+| Completed | Interactive Streamlit dashboard |
 | Coming Soon | Volatility surface, exotic options |
 
 ---
@@ -217,6 +238,7 @@ Time to Maturity: 1 years
 | SciPy | >=1.10.0 | Normal distribution and Brent's method |
 | Matplotlib | >=3.7.0 | Sensitivity and analysis plots |
 | pytest | >=7.4.0 | Unit testing |
+| Streamlit | >=1.30.0 | Interactive web dashboard |
 
 ---
 
