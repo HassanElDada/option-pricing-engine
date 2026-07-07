@@ -21,7 +21,7 @@ st.set_page_config(
 #st.title is the large heading, markdown is markdown text
 st.title("📈 Options Pricing and Volatility Analytics Engine")
 st.markdown("Built with Black-Scholes, Monte Carlo simulation, and implied volatility solving.")
-
+st.markdown("**Hassan El Dada** — McGill University")
 # --- tabs ---
 # st.tabs creates a tabbed interface — each tab is a separate section
 tab1, tab2, tab3 = st.tabs([

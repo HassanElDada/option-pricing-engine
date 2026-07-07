@@ -7,7 +7,7 @@ A Black-Scholes options pricing engine built in Python, featuring European call 
 ## Live Demo
 
 Try the interactive dashboard here:
-**[https://hassaneldada-option-pricing-engine-dashboard-nmkgkn.streamlit.app/](https://hassaneldada-option-pricing-engine-dashboard-nmkgkn.streamlit.app/)**
+**[www.optionpricing.ca](https://www.optionpricing.ca)**
 
 Adjust sliders to price options in real time, run Monte Carlo simulations, and solve for implied volatility — no installation required.
 
